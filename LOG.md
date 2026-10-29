@@ -27,6 +27,7 @@ End the log with your plan for what to try next.
  도쿄:음식, 꽃, 나무, 새, 전시작품, 악기연주, 게임기, 열기구 
  오사카: 음식/음료, 식당 실내, 화단/산책로, 스테인드글라스, 진열 상품, 조명 전시
  타이베이: 유물, 설명 패널, 히비스커스 꽃, 강아지, 흑백 감성 사진, 메달
+ 
 ## 29 Oct baseline (Track A)
 - changed: 없음. 시작 레시피 그대로(batch 64, RandomResizedCrop + 좌우반전 + ColorJitter, AdamW 3e-4, OneCycle, label smoothing 0.1)이고 선택도 전체 44,257장 그대로.
 - why: 시작점 성적을 잡고, 레시피는 그대로 둔 채 시드만 바꿨을 때 점수가 얼마나 흔들리는지 보려고 시드 0과 시드 1로 두 번 돌렸다.
