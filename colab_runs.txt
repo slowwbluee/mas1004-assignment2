@@ -1,5 +1,3 @@
-# The photos on Colab's local disk, and a message in the log if they cannot be unpacked there.
+# The validation photos on Colab's local disk, in case the link in the Drive copy is stale.
 python src/get_data.py --into /content/data --keep /content/drive/MyDrive/mas1004/starter.zip
-python src/curate.py count
-python src/official.py --tag baseline --data /content/data/starter
-python src/official.py --tag baseline --seed 1 --data /content/data/starter
+python src/curate.py mistakes results/baseline_seed0/model.onnx --photos /content/data/starter/val --every 2
