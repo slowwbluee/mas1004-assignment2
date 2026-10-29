@@ -1,2 +1,5 @@
-python src/official.py --tag baseline
-python src/official.py --tag baseline --seed 1
+# The photos on Colab's local disk, and a message in the log if they cannot be unpacked there.
+python src/get_data.py --into /content/data --keep /content/drive/MyDrive/mas1004/starter.zip
+python src/curate.py count
+python src/official.py --tag baseline --data /content/data/starter
+python src/official.py --tag baseline --seed 1 --data /content/data/starter
