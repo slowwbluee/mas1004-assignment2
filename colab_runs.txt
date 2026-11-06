@@ -1,2 +1,2 @@
-python src/official.py --tag street
-python src/official.py --tag street --seed 1
+python src/official.py --tag drop_street
+python src/official.py --tag drop_street --seed 1
