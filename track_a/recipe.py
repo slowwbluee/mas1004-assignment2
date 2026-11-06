@@ -24,12 +24,6 @@ from torchvision import transforms as T
 
 BATCH_SIZE = 64
 
-# How often a photo is drawn, by where it came from. The validation photos and
-# the photos the grader uses are mostly street scenes, so street photos are
-# drawn more often than Commons ones. osv5m gets the largest weight, but not so
-# large that it becomes the only clue: Busan has no osv5m photos at all.
-SOURCE_WEIGHTS = {"commons": 1.0, "youtube": 2.0, "osv5m": 4.0}
-
 
 def train_transform():
     """A function that turns one training photo (a PIL image) into a 224 x 224 one.
@@ -52,11 +46,8 @@ def sample_weights(cities, paths):
     list of positive numbers of the same length, where a photo with weight 2
     is drawn twice as often as one with weight 1. Return None to go through
     the selection in a new random order each time, every photo once per round.
-
-    A path looks like "busan/commons_104708282.jpg", so the part of the file
-    name before the first "_" says where the photo came from.
     """
-    return [SOURCE_WEIGHTS.get(p.rsplit("/", 1)[-1].split("_", 1)[0], 1.0) for p in paths]
+    return None
 
 
 def make_optimizer(model):
