@@ -1,3 +1,2 @@
-# The validation photos on Colab's local disk, in case the link in the Drive copy is stale.
-python src/get_data.py --into /content/data --keep /content/drive/MyDrive/mas1004/starter.zip
-python src/curate.py mistakes results/baseline_seed0/model.onnx --photos /content/data/starter/val --every 2
+python src/official.py --tag street
+python src/official.py --tag street --seed 1
