@@ -1,6 +1,3 @@
-python src/train_b.py --tag b_starter --submit
-python src/check_submission.py --no-val
-python src/keep_submission.py --tag b_starter
 python src/train_b.py --tag b_mobilenet320 --model mobilenet_v3_large --size 320 --epochs 6 --balance --submit
 python src/check_submission.py --no-val
 python src/keep_submission.py --tag b_mobilenet320
