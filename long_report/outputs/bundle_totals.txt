@@ -1,0 +1,4 @@
+youtube  bundles  114  photos  12900
+commons  bundles  284  photos  19811
+both     bundles  398  photos  32711  of 44257 = 73.9%
+sheets    398  one per bundle, biggest first

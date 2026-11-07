@@ -1,0 +1,11 @@
+seoul, youtube: 34 bundles of 20 or more photos, 4184 photos, biggest first
+seoul, commons: 76 bundles of 20 or more photos, 4915 photos, biggest first
+busan, youtube: 17 bundles of 20 or more photos, 1704 photos, biggest first
+busan, commons: 33 bundles of 20 or more photos, 2219 photos, biggest first
+tokyo, youtube: 36 bundles of 20 or more photos, 4456 photos, biggest first
+tokyo, commons: 66 bundles of 20 or more photos, 4228 photos, biggest first
+osaka, youtube: 18 bundles of 20 or more photos, 1512 photos, biggest first
+osaka, commons: 52 bundles of 20 or more photos, 3922 photos, biggest first
+taipei, youtube: 9 bundles of 20 or more photos, 1044 photos, biggest first
+taipei, commons: 57 bundles of 20 or more photos, 4527 photos, biggest first
+398 sheets in /Users/mac/Documents/mas1004-assignment2/results/curate (grp_index.csv lists them, biggest first).

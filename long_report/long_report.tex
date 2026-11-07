@@ -13,16 +13,17 @@
 % New Project, Upload Project. Set Menu, Compiler to XeLaTeX, and Recompile.
 
 \documentclass[11pt]{article}
-\usepackage{mas1004}
+\usepackage[ko]{mas1004}
 
 \reporttitle{Assignment 2: Long report}
-\studentname{Your name}
-\studentid{Your student ID}
+\studentname{김소연}
+\studentid{20261179}
 
 \begin{document}
 \makeheader
 
-\fillin{Your leaderboard nickname, and the tags of your last Track A and Track B releases.}
+Leaderboard nickname: \texttt{slowwbluee}. Track A 마지막 release: \texttt{track-a-3},
+``every city drawn equally often''. Track B: \fillin{release 없음}.
 
 % The sections below are a suggestion. Change, merge or add sections as you
 % like; README.md, "The long report", says what a reader should be able to see.
@@ -31,32 +32,288 @@
 \section*{Track A}
 
 \begin{center}\footnotesize
-\begin{tabular}{lp{0.6\linewidth}r}
+\begin{tabular}{lp{0.44\linewidth}rrr}
 \toprule
-tag & what changed from the run before & validation \\
+tag & 이전 실행에서 바뀐 것 & seed 0 & seed 1 & 평균 \\
 \midrule
-\multicolumn{3}{l}{\fillin{one row per recipe, with the numbers from experiments.csv}} \\
+baseline & 없음. 시작 레시피, 학습 사진 44,257장 전부 & 0.5028 & 0.4879 & 0.4954 \\
+street & \texttt{sample\_weights}: 출처별로 다른 횟수 (commons $\times$1, youtube $\times$2, osv5m $\times$4) & 0.4857 & 0.4812 & 0.4835 \\
+drop\_street & 레시피는 시작 레시피로 되돌리고, 학습 사진 6,964장을 뺌 (37,293장 남음) & 0.4841 & 0.4918 & 0.4880 \\
+balanced & \texttt{sample\_weights}: 다섯 도시를 똑같이 뽑음 (사진은 44,257장 전부) & 0.5038 & 0.5123 & 0.5081 \\
 \bottomrule
 \end{tabular}
+
+{\footnotesize 표 1. 레시피마다의 검증 점수. 평균은 두 시드 행의 평균이다.}
 \end{center}
 
-\fillin{What you tried, why, and what you think each result means.}
+모든 실행은 같은 조건에서 쟀다. 점수는 도시별 정답률 다섯 개의 평균이고, 학습 사진
+수는 249,984장으로 고정이며(예산은 레시피가 정하지 않는다), 한 번에 한 가지만 바꾸고,
+바꾼 것마다 시드 0과 시드 1로 두 번 학습해 두 값이 같은 방향으로 움직이는지 보았다.
 
-\fillin{Your final recipe and selection, and their leaderboard score next to
-their validation score.}
+\subsection*{baseline: 시작점과 잡음의 크기}
+
+시작 레시피(batch 64, RandomResizedCrop + 좌우반전 + ColorJitter, AdamW
+$3\times10^{-4}$, OneCycle, label smoothing 0.1)를 학습 사진 44,257장 전부로 두 번
+학습했다. 레시피는 그대로 두고 시드만 0과 1로 바꾼 이유는 시작점을 잡고, 시드만
+바꿨을 때 점수가 얼마나 흔들리는지 알고 싶었기 때문이다.
+
+두 값은 0.5028과 0.4879로 0.0149 차이가 났다. 이 차이가 이후 판단의 기준이 되었다.
+``0.015보다 확실히 크게 변해야 효과가 있다''고 보고, 그보다 작은 변화는 운과
+구별하지 않으려 했다.
+
+점수는 생각보다 낮았다. 사진을 봤을 때는 각 지역의 특징이 드러난 사진이 꽤
+있었는데, 부산(0.382 / 0.386)과 오사카(0.370 / 0.363)는 도쿄(0.641 / 0.618)와
+타이베이(0.559 / 0.521)보다 지역적 특색이 잘 안 드러난 것 같았다. 부산은 사진으로
+보았을 때 부산 바다라기보다는 바다 사진의 느낌이 강했고, 오사카는 일본 표지판이나
+간판 거리 사진은 있었지만 오사카 사진이라고 판단하기는 어려웠을 것이라고 생각한다.
+부산(5,191장)과 오사카(7,200장)의 사진 수가 적다는 점도 이유가 될 수 있다.
+
+\subsection*{street: 길거리 사진을 더 자주}
+
+\textbf{바꾼 것.} \texttt{sample\_weights}가 사진이 나온 곳에 따라 뽑히는 횟수를
+정하도록 했다: commons $\times$1, youtube $\times$2, osv5m $\times$4. 사진은 여전히
+44,257장 전부이고, 변환·최적화·스케줄은 시작 레시피 그대로다.
+
+\textbf{왜.} baseline의 틀린 사진 대부분이 길거리 장면이었고, 검증 사진은 학습보다
+길거리 사진 비중이 높았다(학습 osv5m 7\%, 검증 14\%). 모델이 랜드마크 말고 평범한
+거리에서 단서를 찾게 하고 싶었다. 부산에는 osv5m 사진이 0장이라 오히려 부산이 더
+안 맞을 수도 있다고 예상했다.
+
+\textbf{결과.} 0.4857과 0.4812, 평균 0.4835로 baseline 평균 0.4954보다 0.012
+낮다. 여전히 0.015 안이라 확실히 나빠졌다고도 말할 수 없다.
+
+\textbf{내가 생각한 의미.} 점수가 오르지는 않고 오히려 조금 떨어졌다. 도시별로는
+도쿄($-0.022$)와 타이베이($-0.023$)가 가장 많이 떨어졌다. 길거리 사진을 늘린 만큼
+commons 사진을 보는 비율이 64\%에서 43\%로 줄었는데, 도쿄는 도쿄타워·스카이트리,
+타이베이는 중정기념당·사원처럼 commons에 있는 랜드마크 사진이 도시를 맞히는 데
+도움이 됐던 것 같다. 또 검증 사진도 66\%가 commons라서, 길거리 사진을 늘린 효과가
+검증 점수에는 잘 드러나지 않았을 수 있다. 그리고 osv5m 사진은 3,110장밖에 없는데
+4배 자주 보여줬기 때문에, 새로운 단서를 배우기보다 같은 사진을 반복해서 외웠을
+수도 있다. 부산은 시드 0에서는 떨어지고 시드 1에서는 오히려 가장 높게 나와서
+흔들림이 커서 판단하기 어려웠다. 결론적으로 사진을 ``얼마나 자주 보여주는지''
+바꾸는 것만으로는 부족하고, 다음에는 길거리와 관계없는 사진을 아예 빼보기로 했다.
+
+\subsection*{drop\_street: 길거리와 상관없는 사진 빼기}
+
+\textbf{바꾼 것.} \texttt{recipe.py}를 시작 레시피로 되돌려(가중치 없음,
+\texttt{sample\_weights}가 \texttt{None}) recipe\_sha가 baseline과 같은
+\texttt{17ac485223fa}가 되게 하고, 학습 사진만 44,257장에서 37,293장으로 줄였다.
+그래서 baseline과의 차이는 오직 뺀 사진이다. 어떤 사진을 뺐는지는 다음 절에 있다.
+
+\textbf{왜.} 검증 사진과 리더보드 사진, 최종 사진이 모두 평범한 길거리 장면인데
+학습 사진에는 유물, 음식, 기자회견, 모터쇼 차처럼 길거리에서 볼 수 없는 사진이 많이
+섞여 있었다. 학습 횟수가 정해져 있으니 이런 사진을 빼면 모델이 길거리 사진을 더
+많이 보고 길거리에서 도시를 구별하는 단서를 더 잘 배울 것이라고 생각했다. 서울과
+타이베이에 유독 유물·박물관 사진이 많아서, 모델이 유물 자체보다 어두운 배경에
+조명이 비춰지는 물건이라고만 외웠을 수도 있다고 보았다.
+
+\textbf{결과.} 0.4841과 0.4918, 평균 0.4880으로 baseline보다 0.007 낮다.
+
+\textbf{내가 생각한 의미.} 전체 점수는 0.495에서 0.488로 떨어졌는데 0.015보다
+작아서 전체적으로 효과가 있었다고 말할 수 없다. 하지만 도시별로는 두 시드가 같은
+방향으로 움직였다. 부산과 도쿄는 여섯 번의 실험 중 가장 높았고, 오사카와 서울은
+가장 낮았다. 부산은 모터쇼 자동차, 화재 사건, 인물 사진처럼 부산과 상관없는 사진이
+빠지면서 실제 부산 길거리의 특징을 더 잘 배운 것 같다. 반대로 서울과 타이베이는
+예상과 달리 떨어졌는데, 이 두 도시는 사진이 가장 많이 빠진 도시였다(서울 15.7\%,
+타이베이 26.9\%). 유물이나 인물 사진에도 한글, 한자, 한복처럼 나라를 알려주는 단서가
+있었는데 그걸 같이 잃었을 수 있다. 오사카가 떨어지고 도쿄가 오른 것은, 오사카
+사진이 18.7\% 빠지면서 오사카가 더 적은 도시가 되었고, 모델이 헷갈리는 사진을 도쿄
+쪽으로 더 많이 보낸 것이라고 생각한다. 원래 가장 큰 실수가 오사카를 도쿄로 부르는
+것이었기 때문이다. 사진을 빼는 것은 도시마다 효과가 달라서, 전체 평균만 보면 효과가
+서로 상쇄되어 보이지 않는다.
+
+\subsection*{balanced: 다섯 도시를 똑같이}
+
+\textbf{바꾼 것.} \texttt{sample\_weights}에서 도시마다 똑같은 몫을 주도록 했다:
+사진 하나의 무게가 그 도시 사진 수의 역수이므로, 부산의 5,191장이
+서울의 11,274장과 같은 횟수만큼 뽑힌다. 사진은 44,257장 전부이고 레시피의 나머지는
+시작 레시피 그대로다.
+
+\textbf{왜.} 두 번의 실험에서 같은 결론이 나왔다. drop\_street에서 오사카 사진이
+줄자 오사카 점수가 떨어지고 도쿄 쪽으로 쏠렸고, baseline의 부산·오사카는 사진 수가
+적은 도시라 계속 낮았다. 그래서 다음에는 사진이 적은 부산과 오사카를 더 자주
+보여주는 방법을 시도해보고 싶었다.
+
+\textbf{결과.} 0.5038과 0.5123, 평균 0.5081로 baseline 평균 0.4954보다 0.013
+높다. 여덟 번의 실행 중 두 시드가 모두 baseline 두 시드보다 높게 나온 첫 실험이다.
+다만 0.013은 아직 0.015보다 작아서 ``확실하다''고 말하기는 어렵다.
+
+\textbf{내가 생각한 의미.} 도시별로는 변화가 아주 컸다. 부산($+0.075$)과
+오사카($+0.084$)가 크게 올랐고, 도쿄는 0.104나 떨어졌다. 사진이 적은 부산과
+오사카를 더 자주 보여주자, 모델이 헷갈리는 사진을 도쿄나 서울로 보내던 습관이
+줄어든 것 같다. drop\_street에서 오사카가 줄자 도쿄로 쏠렸던 것과 반대 방향의
+결과라서, 도시별 사진 수가 모델의 판단에 큰 영향을 준다는 걸 알 수 있었다.
+
+점수는 다섯 도시 정답률의 평균이라, 잘하던 도쿄를 조금 포기하고 못하던
+부산·오사카를 끌어올리는 것이 전체 점수에 유리했다. 다만 도쿄는 가장 잘 맞히던
+도시에서 두 번째나 세 번째로 잘 맞히는 도시가 되었고, 서울과 거의 비슷해졌다.
+그래서 완전히 똑같이 맞추기보다 중간 정도로 균형을 맞추는 게 더 좋을 수도 있다.
+
+\begin{center}\footnotesize
+\begin{tabular}{lrrrr}
+\toprule
+도시 & baseline & street & drop\_street & balanced \\
+\midrule
+seoul & 0.5569 & 0.5592 & 0.5418 & 0.5217 \\
+busan & 0.3838 & 0.3773 & 0.4011 & 0.4587 \\
+tokyo & 0.6295 & 0.6076 & 0.6456 & 0.5258 \\
+osaka & 0.3666 & 0.3562 & 0.3365 & 0.4506 \\
+taipei & 0.5399 & 0.5170 & 0.5147 & 0.5834 \\
+\midrule
+전체 & 0.4954 & 0.4835 & 0.4880 & 0.5081 \\
+\bottomrule
+\end{tabular}
+
+{\footnotesize 표 2. 도시별 검증 점수, 두 시드 평균. 전체는 표 1의 평균과 같다.}
+\end{center}
+
+\subsection*{최종 레시피와 선택}
+
+최종 Track A 레시피는 \texttt{balanced}다. 바뀐 것은 \texttt{sample\_weights}
+하나뿐이고, 선택은 학습 사진 44,257장 전부다(\texttt{selection.csv}가 없다). 이
+레시피는 release \texttt{track-a-3}, ``every city drawn equally often''으로 냈다.
+검증 점수는 0.5038(시드 0)과 0.5123(시드 1)이고, 리더보드 점수는
+\fillin{리더보드 점수와, 검증 점수와 다르다면 그 이유}.
 
 % ---------------------------------------------------------------------------
 \section*{Decisions you made from photos}
 
-\picturefile{figures/mistakes_baseline_seed0_busan_00.png}
+\begin{figure}[h]
+\centering
+\picturefile[0.92\linewidth]{figures/mistakes_baseline_seed0_busan_00.png}
+\caption{baseline(시드 0)이 부산 사진이라고 확신했지만 틀린 48장. 검증 사진을 두 장에
+한 장씩 채점해 도시마다 가장 확신한 오답을 모은 것이다.}
+\end{figure}
 
-\fillin{What you looked at, what you saw in common, and the rule you wrote
-before acting.}
+\textbf{무엇을 봤나.} \texttt{curate.py mistakes}로 만든 시트 5장(도시마다 1장)을 다
+봤다. 검증 사진 6,039장을 채점했고, 도시별 오답은 서울 549/1218, 부산 434/695,
+도쿄 677/1940, 오사카 677/1064, 타이베이 494/1122였다.
 
-\fillin{What you changed (the output of curate.py count, or the photos you
-added), and the scores before and after.}
+\textbf{공통점 두 가지.} 첫째, 틀린 사진 대부분이 같은 나라의 다른 도시로 갔다.
+오사카 사진은 거의 다 도쿄로, 부산 사진은 대부분 서울로 갔다. 모델이 한국인지
+일본인지는 어느 정도 구별하지만 같은 나라 안에서 도시를 나누는 단서는 잡지 못한 것
+같다. 둘째, 학습 사진을 봤을 때는 랜드마크와 관광지가 많았는데, 틀린 사진을 모아
+놓으니 차 안에서 찍은 도로, 영상 캡처, 360도 사진처럼 평범한 길거리 장면이
+대부분이었다. 모델은 랜드마크로 도시를 구별하는 법을 배웠는데 검증 사진에는 그런
+단서가 거의 없어서 틀린 것 같다. 이 관찰에서 Track A의 두 실험(street,
+drop\_street)이 나왔다.
 
-\fillin{The requests you gave your agent for these decisions.}
+\textbf{행동하기 전에 적은 규칙.} ``길거리에서 볼 수 없는 장면은 뺀다.''
+\begin{enumerate}
+\item 박물관·전시물: 유물, 도자기, 조각, 설명 패널, 전시장 내부
+\item 음식·음료 클로즈업: 접시, 음식 사진, 술병
+\item 실내 행사: 기자회견, 회의, 시상식, 강연, 공연장, 단체 기념사진
+\item 행사장·전시장 자동차: 모터쇼 차, 차 실내, 바퀴 클로즈업
+\item 동식물 클로즈업: 새, 꽃, 고양이·강아지, 동물원·수족관
+\item 인물 사진: 코스프레, 모델 사진처럼 사람이 화면 대부분인 것
+\item 글자만 있는 사진: 문서, 표지판 클로즈업 없이 종이·포스터만 있는 것
+\item 특정 사건·행사 하나를 수십 장씩 찍은 묶음 (화재 현장, 의전 행사 등)
+\end{enumerate}
+사진을 고르는 동안 이 규칙에 세 가지를 더했다: 돌 기념물과 명판의 클로즈업, 한
+사건이나 행사를 찍은 묶음(화재, 훈련, 의전 행사, 축구 경기, 불꽃놀이), 항공기와
+공항. 반대로 길거리 풍경, 역 표지판, 건물 외관, 블랙박스와 360도 사진은 남겼다.
+
+\textbf{44,257장에서 어떻게 찾았나.} 사진을 한 장씩 볼 수는 없어서, 같은 곳에서
+나온 사진을 묶음으로 봤다. YouTube 영상 하나의 프레임과 Commons 업로더 한 사람의
+사진은 한 장면 안에서 찍힌 것이라, 묶음 하나를 판단하면 사진 수십 장이 한꺼번에
+정해진다. 114개 영상(12,900프레임)과, 사진이 20장 이상인 Commons 업로더 284명
+(19,811장)으로 398장의 시트를 만들었고, 큰 묶음부터 봤다. 이것으로 학습 사진
+44,257장 가운데 32,711장(74\%)을 덮었다.
+
+\begin{figure}[h]
+\centering
+\picturefile[0.92\linewidth]{figures/grp_busan_commons_05_00.png}
+\caption{묶음 하나가 시트 한 장. 부산의 업로더 한 사람이 올린 사진이고, 화재 현장
+한 사건을 찍은 묶음이라 규칙 8번으로 통째로 뺐다. 큰 묶음부터 보도록 정렬되어 있다.}
+\end{figure}
+
+\outputfile{outputs/grouped_sheets.txt}
+
+\outputfile{outputs/bundle_totals.txt}
+
+\textbf{무엇이 바뀌었나.} 규칙에 해당하는 사진 6,964장을 뺐고, 학습 사진은 44,257장
+에서 37,293장이 되었다. 묶음 단위로 뺀 것이 94묶음(6,798장), 시트 번호로 고른 것이
+9시트(166장)이고, 같은 사진이 두 번 지목된 적은 없다. \texttt{curate.py count}의
+결과는 다음과 같다.
+
+\outputfile{outputs/curate_count_drop_street.txt}
+
+\textbf{점수 전과 후.} 뺀 사진만 바꾸고 레시피는 baseline으로 되돌린
+drop\_street는 0.4841(시드 0)과 0.4918(시드 1)로, baseline의 0.5028과 0.4879에서
+평균 0.007 내려갔다. 전체 점수는 움직이지 않았지만 도시별로는 부산과 도쿄가 올랐고
+서울·오사카·타이베이가 내려갔다(표 2).
+
+\textbf{에이전트에게 보낸 요청.} 아래는 그 결정을 위해 내가 그대로 보낸 요청이다.
+
+\begin{Verbatim}[fontsize=\footnotesize, breaklines, breakanywhere, frame=single, framesep=2mm]
+Drop scenes you can't see on the street: museum objects and panels, food
+and drink close-ups, indoor events (press conferences, meetings,
+ceremonies, performances), cars at motor shows, close-ups of animals and
+flowers, portraits where a person fills the frame, and documents or
+posters only. Keep street views, station signs, building exteriors,
+dashcam and 360 photos.
+\end{Verbatim}
+
+\begin{Verbatim}[fontsize=\footnotesize, breaklines, breakanywhere, frame=single, framesep=2mm]
+My drop rule now also covers: close-ups of stone monuments and plaques;
+bundles of one event or incident (fire, drills, ceremonies, football
+matches, fireworks); aircraft and airports.
+
+For the next experiment, put recipe.py back to the starter recipe (no
+street weighting), so the only change from baseline is the dropped
+photos. Tag it "drop_street".
+\end{Verbatim}
+
+\begin{Verbatim}[fontsize=\footnotesize, breaklines, breakanywhere, frame=single, framesep=2mm]
+Drop the WHOLE bundle (use .paths.txt) for these:
+osaka_commons_01 (food), 02 (animals), 09 (food), 11 (monument plaques),
+12 (motor show cars), 21 (flowers), 25 (flowers, animals), 34 (flowers,
+animals, food), 40 (cars, animals)
+osaka_youtube_03 (selfie faces), 11 (cars), 12 (shoes, food), 13 (figures,
+food), 15 (selfie faces)
+busan_commons_01 (food), 02 (portraits), 03 (cars), 05 (one event: fire),
+12 (portraits), 13 (one event, portraits), 24 (museum objects),
+26 (portraits), 31 (animals), 32 (museum objects, paintings),
+33 (museum objects)
+seoul_commons_03 (cars), 05 (museum), 06 (food), 13, 15, 17 (portraits),
+18 (museum), 21 (one event: rescue drill), 23 (food), 26 (indoor talks),
+33 (museum), 34 (portraits), 39 (one event: palace ceremony), 42,
+43 (museum), 44, 53 (portraits), 47, 62 (aircraft), 59 (portraits,
+indoor), 63 (animals), 65 (food), 67 (portraits), 69 (museum, medals),
+72 (animals), 73 (flowers), 75 (trees), 76 (objects)
+taipei_commons_01 (portraits, indoor), 04 (food), 06, 07 (museum objects),
+09 (portraits), 11 (food, indoor), 19, 21, 23 (portraits), 20, 26 (museum
+objects), 22 (portraits, characters, food), 29, 31, 34, 35, 38, 49, 54,
+55 (portraits), 33 (portraits, cars), 42 (food, indoor), 44 (portraits,
+animals), 51 (animals, plants)
+tokyo_commons_06 (fireworks), 09 (food), 17 (fireworks, animals,
+portraits), 18, 25, 59 (portraits), 20 (cars), 29, 30, 37, 65, 66
+(aircraft), 40, 42 (animals, plants), 48 (food, fireworks), 49 (museum,
+indoor), 64 (food)
+\end{Verbatim}
+
+\begin{Verbatim}[fontsize=\footnotesize, breaklines, breakanywhere, frame=single, framesep=2mm]
+Drop ONLY these numbers:
+osaka_commons_36: 19-26, 29-34, 36 (food, objects, flowers)
+osaka_commons_37: 9-21, 31, 35 (aquarium, flowers)
+osaka_commons_47: 7-18 (aquarium, indoor restaurant)
+busan_commons_16: 9, 11-14, 16, 18-32, 34, 35, 44, 45 (indoor altars,
+museum objects, monument close-ups)
+busan_commons_22: 5, 6, 12, 14-17, 19-24, 31 (indoor temple halls, plaque
+and statue close-ups)
+busan_commons_27: 1, 2, 5-13, 15-20, 23 (grave and monument plaques,
+portrait)
+seoul_commons_20: 1-6, 12-25, 27, 30, 32, 36, 37, 44-48 (indoor meetings,
+museum figures)
+seoul_commons_36: 1, 2, 19, 20, 28, 32, 33, 35-43 (food and flower
+close-ups)
+tokyo_commons_07: 28-48 (one event: football match)
+\end{Verbatim}
+
+묶음 이름은 시트 이름(\texttt{grp\_<도시>\_<출처>\_<번호>})에서 도시와 출처를 줄인
+것이고, 묶음 전체를 뺄 때는 그 시트의 \texttt{.paths.txt}에 있는 사진을 전부 뺐다.
+시트 번호로 고른 것은 그 시트에 그려진 사진 중에서 고른 번호만 뺐다. 같은 사진이 두
+목록에 겹쳐 지목된 경우는 없었다.
 
 % ---------------------------------------------------------------------------
 \section*{Track B}
@@ -75,10 +332,27 @@ might disagree.}
 % ---------------------------------------------------------------------------
 \section*{What made the difference}
 
-\fillin{Which change helped most and which least, in both tracks, with your
-numbers.}
+\textbf{Track A에서 가장 도움이 된 것.} \texttt{balanced}다. 사진을 한 장도 바꾸지
+않고 \texttt{sample\_weights}만 바꿨는데 평균이 0.4954에서 0.5081로 0.013 올랐고,
+여덟 번의 실행 중 두 시드가 모두 baseline 두 시드보다 높게 나온 유일한 실험이다.
+도시별로는 부산이 0.3838에서 0.4587로, 오사카가 0.3666에서 0.4506으로 올랐다. 두
+도시 모두 사진 수가 가장 적은 도시라는 점이 원인이었다고 본다.
 
-\fillin{What you would do next with one more week.}
+\textbf{가장 도움이 안 된 것.} \texttt{street}다. 평균이 0.4835로 0.012 내려갔고
+도쿄와 타이베이가 크게 떨어졌다. 사진을 ``얼마나 자주 보여주는지'' 바꾸는 것만으로는
+부족하다는 결론이었다. \texttt{drop\_street}는 평균으로는 0.007 내려갔지만, 뺀
+사진이 가장 많았던 서울과 타이베이가 내려간 반면 부산과 도쿄는 올라서, 같은 규칙이
+도시마다 반대로 작용했다. 그래서 전체 평균 하나로는 판단할 수 없는 변화였다.
+
+\textbf{Track B.} \fillin{Track B에서 가장 도움이 된 변화와 가장 안 된 변화, 그 숫자.}
+
+\textbf{다음 주가 있다면.} 먼저 \texttt{balanced}의 정도를 조절해보고 싶다. 지금은
+다섯 도시의 몫을 완전히 같게 했는데, 그러면 가장 잘 맞히던 도쿄의 점수를 0.104나
+내주게 된다. 도시 몫을 부분적으로만 균등하게 하는 중간 지점이 더 좋을 수 있다.
+다음으로 \texttt{drop\_street}와 \texttt{balanced}를 함께 써보고 싶다. 두 실험은
+부산·오사카를 올린 방향이 같으므로 같이 쓰면 더 오를 수 있고, 대신 서울·타이베이의
+손실을 얼마나 줄일 수 있는지가 관건이다. Track B에서는
+\fillin{Track B에서 다음 주에 할 일}.
 
 % ---------------------------------------------------------------------------
 \section*{All runs}

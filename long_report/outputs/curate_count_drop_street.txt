@@ -1,0 +1,8 @@
+city      selected     of   by source
+seoul         9503  11274   commons 4999, osv5m 320, youtube 4184
+busan         4274   5191   commons 2570, youtube 1704
+tokyo        12367  13347   commons 5995, osv5m 1916, youtube 4456
+osaka         5855   7200   commons 4358, osv5m 341, youtube 1156
+taipei        5294   7245   commons 3717, osv5m 533, youtube 1044
+total 37293 rows
+dropped: 1756 portraits; 1018 food; 524 museum objects; 444 cars; 376 museum; 234 aircraft; 218 animals; 182 food, indoor; 178 portraits, indoor; 168 selfie faces; 150 one event: fire; 150 fireworks; 147 monument plaques; 141 motor show cars; 101 flowers; 98 portraits, characters, food; 96 animals, plants; 88 fireworks, animals, portraits; 76 one event: rescue drill; 71 one event, portraits; 62 indoor talks; 59 shoes, food; 58 figures, food; 57 flowers, animals; 54 portraits, cars; 42 flowers, animals, food; 41 one event: palace ceremony; 33 food, fireworks; 32 museum, indoor; 31 portraits, animals; 30 cars, animals; 30 indoor meetings, museum figures; 25 indoor altars, museum objects, monument close-ups; 22 museum, medals; 21 museum objects, paintings; 21 one event: football match; 20 trees; 20 objects; 18 grave and monument plaques, portrait; 16 food and flower close-ups; 15 food, objects, flowers; 15 aquarium, flowers; 14 indoor temple halls, plaque and statue close-ups; 12 aquarium, indoor restaurant
