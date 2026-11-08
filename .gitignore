@@ -6,3 +6,7 @@ __pycache__/
 submission/*.onnx
 # the kept copy of each run, kept so the next run does not overwrite it
 submission/*/
+# macOS writes this in every folder it opens
+.DS_Store
+# the short report is built and handed in on its own, not from this repository
+short_report.zip

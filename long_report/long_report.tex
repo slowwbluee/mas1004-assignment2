@@ -14,6 +14,8 @@
 
 \documentclass[11pt]{article}
 \usepackage[ko]{mas1004}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
 
 \reporttitle{Assignment 2: Long report}
 \studentname{김소연}
@@ -168,6 +170,33 @@ taipei & 0.5399 & 0.5170 & 0.5147 & 0.5834 \\
 {\footnotesize 표 2. 도시별 검증 점수, 두 시드 평균. 전체는 표 1의 평균과 같다.}
 \end{center}
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=5pt, width=\linewidth, height=6.2cm,
+  ymin=0.30, ymax=0.68,
+  ylabel={검증 점수},
+  symbolic x coords={seoul,busan,tokyo,osaka,taipei},
+  xtick=data,
+  enlarge x limits=0.16,
+  ymajorgrids, grid style={gray!25},
+  tick label style={font=\footnotesize},
+  label style={font=\footnotesize},
+  legend style={at={(0.5,-0.22)}, anchor=north, legend columns=-1, font=\footnotesize, draw=none},
+]
+\addplot coordinates {(seoul,0.5569) (busan,0.3838) (tokyo,0.6295) (osaka,0.3666) (taipei,0.5399)};
+\addplot coordinates {(seoul,0.5592) (busan,0.3773) (tokyo,0.6076) (osaka,0.3562) (taipei,0.5170)};
+\addplot coordinates {(seoul,0.5418) (busan,0.4011) (tokyo,0.6456) (osaka,0.3365) (taipei,0.5147)};
+\addplot coordinates {(seoul,0.5217) (busan,0.4587) (tokyo,0.5258) (osaka,0.4506) (taipei,0.5834)};
+\legend{baseline,street,drop\_street,balanced}
+\end{axis}
+\end{tikzpicture}
+\caption{레시피 넷의 도시별 검증 점수. 표 2와 같은 값(두 시드 평균)이고, 막대 하나가 레시피
+하나다. 다섯 도시를 따로 보면 어느 변화가 어느 도시를 움직였는지가 드러난다:
+\texttt{balanced}는 부산·오사카·타이베이에서 가장 높고 서울·도쿄에서 가장 낮다.}
+\end{figure}
+
 \subsection*{최종 레시피와 선택}
 
 최종 Track A 레시피는 \texttt{balanced}다. 바뀐 것은 \texttt{sample\_weights}
@@ -228,9 +257,13 @@ drop\_street)이 나왔다.
 
 \begin{figure}[h]
 \centering
-\picturefile[0.92\linewidth]{figures/grp_busan_commons_05_00.png}
-\caption{묶음 하나가 시트 한 장. 부산의 업로더 한 사람이 올린 사진이고, 화재 현장
-한 사건을 찍은 묶음이라 규칙 8번으로 통째로 뺐다. 큰 묶음부터 보도록 정렬되어 있다.}
+\sidebyside{figures/grp_busan_commons_05_00.png}{뺀 묶음: 화재 현장 한 사건 150장, 규칙 8번}%
+{figures/grp_osaka_commons_10_00.png}{남긴 묶음: 오사카 지하철 승강장 149장, 규칙에 걸리지 않음}
+\caption{묶음 하나가 시트 한 장, 규칙을 양쪽에서 본 예. 왼쪽은 부산의 업로더 한 사람이
+올린 화재 현장 사진이라 규칙 8번(한 사건을 수십 장)으로 통째로 뺐고, 오른쪽은 오사카의
+업로더 한 사람이 올린 지하철 승강장 사진이라 그대로 남겼다. 오른쪽 묶음은 제목 대부분에
+Station이 들어 있고, 앞의 규칙에서 ``역 표지판, 건물 외관은 남긴다''고 한 쪽에 해당한다.
+큰 묶음부터 보도록 정렬되어 있다.}
 \end{figure}
 
 \outputfile{outputs/grouped_sheets.txt}
@@ -391,13 +424,29 @@ Track A의 도시 균형($+0.075$)보다 크다. 그래서 도시 균형 말고�
 \texttt{balanced}에서도 서울이 0.035 떨어졌으므로 도시 균형 때문에 서울 사진을 덜 보게 된
 영향으로 본다.
 
-아직 남은 가장 큰 실수는 같은 나라끼리 헷갈리는 것이다. 아래 검사 출력의 혼동 행렬에서
+아직 남은 가장 큰 실수는 같은 나라끼리 헷갈리는 것이다. 표 4의 혼동 행렬에서
 오사카를 도쿄로 부른 사진이 651장, 도쿄를 오사카로 부른 사진이 718장으로 가장 많고,
 그다음이 서울을 도쿄로(343장), 타이베이를 서울로(321장) 부른 경우다. 그리고 Track B는
 실행마다 한 번씩만 돌렸기 때문에 Track A처럼 시드에 따른 흔들림이 얼마나 되는지는 아직
 확인하지 못했다. 이 모델을 \texttt{track-b-2}로 냈다. 모은 사진 45장을 더한 실행을 하나
 더 걸어 두었고, 그 결과는 \fillin{b\_mobilenet320\_mine의 검증 점수와 그것이 무엇을
 뜻하는지}.
+
+\begin{center}\footnotesize
+\begin{tabular}{lrrrrrr}
+\toprule
+실제 & seoul & busan & tokyo & osaka & taipei & 합계 \\
+\midrule
+seoul & 1383 & 255 & 343 & 153 & 301 & 2435 \\
+busan & 393 & 702 & 125 & 67 & 103 & 1390 \\
+tokyo & 423 & 88 & 2365 & 718 & 287 & 3881 \\
+osaka & 213 & 70 & 651 & 1029 & 165 & 2128 \\
+taipei & 321 & 77 & 273 & 160 & 1412 & 2243 \\
+\bottomrule
+\end{tabular}
+
+{\footnotesize 표 4. \texttt{b\_mobilenet320}의 혼동 행렬. 행이 실제 도시, 열이 모델의 답이고, \texttt{check\_submission.py}가 검증 사진 12,077장에서 센 값이다. 대각선이 맞힌 수이고, 합계는 행의 합이다.}
+\end{center}
 
 \subsection*{직접 모은 사진}
 
@@ -413,16 +462,33 @@ Track A의 도시 균형($+0.075$)보다 크다. 그래서 도시 균형 말고�
 (\texttt{.gitignore}에 있다). Colab에서 학습하려면 같은 폴더를 구글 드라이브의
 \texttt{My Drive/mas1004/assignment2/data/mine}에 올려 두어야 한다.
 
-\subsection*{검증 점수와 리더보드 점수}
-
-마지막 제출물(\texttt{track-b-2})의 검증 점수는 0.5593이다. Track B 리더보드 점수는
-\fillin{Track B 리더보드 점수}. 리더보드 사진은 학습 사진에 없는 유튜브 채널의 길거리 영상
-프레임이고 검증 사진은 66\%가 Wikimedia Commons 사진이라 두 묶음이 다르다. Track A에서는
-리더보드 점수가 검증 점수보다 0.09쯤 낮았으므로, Track B에서도 두 값이 다르게 나올 수
-있다고 본다.
-
 \subsection*{Your submission, as the grader sees it}
 \outputfile{outputs/check_submission.txt}
+
+% ---------------------------------------------------------------------------
+\section*{검증 점수와 리더보드 점수}
+
+\begin{center}\footnotesize
+\begin{tabular}{llrrrr}
+\toprule
+release & tag & 우리 검증 점수 & grader 검증 점수 & 리더보드 점수 & 차이 \\
+\midrule
+track-a-1 & baseline (시작 레시피) & 0.4954 & --- & 0.401 & $-0.094$ \\
+track-a-3 & balanced & 0.5081 & 0.505 & 0.411 & $-0.097$ \\
+track-b-2 & b\_mobilenet320 & 0.5593 & --- & \fillin{리더보드 점수} & \fillin{차이} \\
+\bottomrule
+\end{tabular}
+
+{\footnotesize 표 5. 검증 점수와 리더보드 점수. 우리 검증 점수는 \texttt{experiments.csv}의 Track A 두 시드 평균과 Track B의 한 번 실행이고, grader 검증 점수는 채점기가 잰 값이다. 차이는 리더보드 점수에서 우리 검증 점수를 뺀 값이다. \texttt{track-a-3}의 리더보드 점수는 grader가 시드 0, 1, 2로 세 번 학습해 평균한 값이고, 시드별로는 0.402에서 0.420 사이였다.}
+\end{center}
+
+리더보드 점수는 두 release 모두 우리 검증 점수보다 0.09쯤 낮다(0.401 대 0.4954, 0.411 대
+0.5081). 리더보드 사진은 학습 사진에 없는 유튜브 채널의 길거리 영상 프레임이고 검증 사진은
+66\%가 Wikimedia Commons 사진이라, 두 사진 묶음이 다르면 점수도 다를 수 있다. 그런데
+레시피를 바꿔 검증 점수가 0.0127 오를 때 리더보드 점수도 0.010 올라서, 두 점수의 격차는
+거의 그대로였다(0.094에서 0.097). 이 격차가 사진 묶음 때문인지 검증 사진의 구성 때문인지는
+이 표만으로 가릴 수 없다. Track B는 검증 점수가 0.5593인데 리더보드 점수는
+\fillin{아직 받지 못했다}.
 
 % ---------------------------------------------------------------------------
 \section*{What made the difference}
