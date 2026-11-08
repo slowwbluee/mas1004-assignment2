@@ -1,3 +1,4 @@
-python src/train_b.py --tag b_mobilenet320 --model mobilenet_v3_large --size 320 --epochs 6 --balance --submit
+python src/count_mine.py
+python src/train_b.py --tag b_mobilenet320_mine --model mobilenet_v3_large --size 320 --epochs 6 --balance --submit --folders data/starter/train data/mine
 python src/check_submission.py --no-val
-python src/keep_submission.py --tag b_mobilenet320
+python src/keep_submission.py --tag b_mobilenet320_mine
