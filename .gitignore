@@ -4,3 +4,5 @@ __pycache__/
 .venv/
 # Track B models go into GitHub releases, not into the history
 submission/*.onnx
+# the kept copy of each run, kept so the next run does not overwrite it
+submission/*/

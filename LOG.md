@@ -110,3 +110,11 @@ End the log with your plan for what to try next.
 도시별로는 변화가 아주 컸다. 부산(+0.075)과 오사카(+0.084)가 크게 올랐고, 도쿄는 0.104나 떨어졌다. 사진이 적은 부산과 오사카를 더 자주 보여주자, 모델이 헷갈리는 사진을 도쿄나 서울로 보내던 습관이 줄어든 것 같다. drop_street에서 오사카가 줄자 도쿄로 쏠렸던 것과 반대 방향의 결과라서, 도시별 사진 수가 모델의 판단에 큰 영향을 준다는 걸 알 수 있었다.
 
 점수는 다섯 도시 정답률의 평균이라, 잘하던 도쿄를 조금 포기하고 못하던 부산·오사카를 끌어올리는 것이 전체 점수에 유리했다. 다만 도쿄는 가장 잘 맞히던 도시에서 두 번째나 세 번째로 잘 맞히는 도시가 되었고, 서울과 거의 비슷해졌다. 그래서 완전히 똑같이 맞추기보다 중간 정도로 균형을 맞추는 게 더 좋을 수도 있다.
+
+## 11/8 b_starter (Track B)
+
+- changed: 없음. train_b.py를 그대로 썼다(resnet18, 224px, 4 에포크, batch 64, lr 3e-4, 라벨 스무딩 0.1). 사진은 data/starter/train 44,257장 전부, 학습 예산 176,896장.
+- why: Track B에서 앞으로의 변화를 비교할 기준점이 필요했다. Colab GPU를 못 써서 이 맥의 CPU로 돌렸다(MPS는 backward에서 죽어서 CPU로 강제했다).
+- validation: 0.4862 (seoul 0.5967, busan 0.3748, tokyo 0.5841, osaka 0.3468, taipei 0.5288). 1시간 56분, cpu. before: 없음(Track B 첫 실행)
+- what it means: b_starter는 내 Track B의 baseline이다. train_b.py를 그대로 쓴 결과이므로, 앞으로 Track B에서 바꾸는 것은 이 0.486과 비교하겠다.
+- released: track-b-1 "train_b.py as given (resnet18 224, 4 epochs)". check_submission.py: format and limits OK (11.17M parameters, 1.81 GMACs @ 224).
