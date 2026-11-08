@@ -23,7 +23,8 @@
 \makeheader
 
 Leaderboard nickname: \texttt{slowwbluee}. Track A 마지막 release: \texttt{track-a-3},
-``every city drawn equally often''. Track B: \fillin{release 없음}.
+``every city drawn equally often''. Track B: \texttt{track-b-2},
+``mobilenet v3 at 320, 6 epochs, cities balanced''.
 
 % The sections below are a suggestion. Change, merge or add sections as you
 % like; README.md, "The long report", says what a reader should be able to see.
@@ -323,13 +324,102 @@ tokyo_commons_07: 28-48 (one event: football match)
 % ---------------------------------------------------------------------------
 \section*{Track B}
 
-\fillin{What you tried, one step at a time, and the validation score after
-each step.}
+Track A에서는 레시피와 사진만 바꿀 수 있지만 Track B에서는 모델까지 바꿀 수 있다. 여기서는
+\texttt{train\_b.py}를 그대로 쓴 실행을 기준점으로 두고, 모델·이미지 크기·학습량·도시
+균형을 한꺼번에 바꾼 실행을 그 위에 얹었다. 두 번 모두 검증은 \texttt{data/starter/val}
+12,077장으로 쟀고, 그 사진들은 학습에 쓰지 않았다.
 
-\fillin{How you collected any extra photos.}
+\begin{center}\footnotesize
+\begin{tabular}{lp{0.42\linewidth}rrr}
+\toprule
+tag & 이전 실행에서 바뀐 것 & 검증 점수 & 학습 장소 & 시간 \\
+\midrule
+b\_starter & 없음. \texttt{train\_b.py} 그대로 (resnet18 224, 4 에포크) & 0.4862 & 이 맥의 CPU & 1시간 56분 \\
+b\_mobilenet320 & mobilenet\_v3\_large, 320 px, 6 에포크, 도시를 똑같이 뽑음 & 0.5593 & Colab GPU & 57분 \\
+\bottomrule
+\end{tabular}
 
-\fillin{Your validation score next to your leaderboard score, and why they
-might disagree.}
+{\footnotesize 표 3. Track B 실행. 점수는 \texttt{data/starter/val} 12,077장에서 잰 것이고, 평균은 Track A와 같은 방식이다.}
+\end{center}
+
+\subsection*{b\_starter: 기준점}
+
+\textbf{바꾼 것.} 없음. \texttt{train\_b.py}를 그대로 썼다(resnet18, 224 px, 4 에포크,
+batch 64, \texttt{lr} $3\times10^{-4}$, 라벨 스무딩 0.1). 사진은 \texttt{data/starter/train}
+44,257장 전부이고 학습 예산은 176,896장이다.
+
+\textbf{왜.} Track B에서 무언가를 바꿨을 때 그게 효과가 있었는지 판단하려면 비교할
+기준점이 필요했다. Track A에서 baseline을 먼저 돌렸던 것처럼, Track B도 아무것도 바꾸지
+않고 그대로 돌렸다. 원래는 Colab에서 돌리려고 했는데 그날 Track A 실험으로 무료 GPU 사용
+한도에 걸렸고, Track B 제출물이 하나도 없는 상태라 마감 전에 최소한 하나는 확보해야 해서
+맥의 CPU로 밤새 돌렸다(MPS는 학습 중 오류가 나서 CPU로 강제했고, 1시간 56분이 걸렸다).
+
+\textbf{결과.} 0.4862(서울 0.5967, 부산 0.3748, 도쿄 0.5841, 오사카 0.3468, 타이베이 0.5288).
+
+\textbf{내가 생각한 의미.} 같은 ResNet18을 쓴 Track A의 baseline 평균(0.4954)과 비슷한
+수준이다. Track B의 기본 학습량 176,896장은 Track A(249,984장)의 약 70\%라서 학습량이
+적은 만큼 조금 낮게 나온 것 같다. 다만 학습 방식이 \texttt{official.py}와 완전히 같지는
+않으므로 정확히 비교할 수는 없다. 도시별로는 Track A baseline과 같은 패턴이 나왔다:
+부산(0.3748)과 오사카(0.3468)가 가장 약하고 서울과 도쿄가 높다. 모델을 바꾸지 않으면 사진
+수가 적은 도시가 약한 문제가 그대로라는 뜻이다. 이 실행은 \texttt{track-b-1}로 냈다.
+
+\subsection*{b\_mobilenet320: 모델과 이미지 크기를 키우고 도시를 균등하게}
+
+\textbf{바꾼 것.} 네 가지다. 모델을 mobilenet\_v3\_large로, 이미지 크기를 224에서 320으로,
+에포크를 4에서 6으로 늘리고, 다섯 도시를 똑같이 뽑는 \texttt{--balance}를 켰다. 시작
+가중치는 IMAGENET1K\_V2, 사진은 같은 44,257장이고 학습 예산은 265,344장이다.
+
+\textbf{왜.} Track A의 \texttt{balanced}에서 도시마다 사진을 똑같은 비율로 보여주자
+부산($+0.075$)과 오사카($+0.084$)가 크게 올랐기 때문에 Track B에도 도시 균형을 적용했다.
+모델을 바꾼 이유는 계산량 제한이다. ResNet18은 224에서 이미 1.81 billion multiply-adds로
+제한(2.0)에 거의 닿아 있어서 이미지를 키울 수 없었는데, MobileNetV3-Large는 320에서도
+0.44 billion이다. 리더보드와 최종 사진은 길거리 사진이라 간판 글자나 표지판 같은 작은
+단서가 중요할 것 같았고, 이미지가 크면 그런 단서가 더 잘 보일 거라고 생각했다.
+
+\textbf{결과.} 0.5593(서울 0.5704, 부산 0.5043, 도쿄 0.6094, 오사카 0.4836, 타이베이
+0.6286)으로 0.4862에서 0.0731 올랐다. Colab GPU에서 57분이 걸렸다.
+
+\textbf{내가 생각한 의미.} Track A에서 정한 기준(시드 차이 0.015)보다 훨씬 크게 변했으므로
+우연이 아니라 실제 효과라고 생각한다. 서울을 제외한 네 도시가 모두 올랐고, 특히 부산
+(0.3748 $\to$ 0.5043, $+0.13$)과 오사카(0.3468 $\to$ 0.4836, $+0.14$)가 가장 많이 올랐다.
+다만 모델, 이미지 크기, 학습 횟수, 도시 균형 네 가지를 한꺼번에 바꾸고 학습량도 176,896
+장에서 265,344장으로 늘렸기 때문에 어느 것이 얼마나 도움이 됐는지는 나눌 수 없다. Track
+A와 비교해 짐작할 수 있는 부분은 있다. Track A에서 도시 균형만 바꿨을 때 도쿄가 0.104
+떨어졌는데, 여기서는 도시 균형을 켰는데도 도쿄가 0.025 올랐고 부산의 상승폭($+0.13$)도
+Track A의 도시 균형($+0.075$)보다 크다. 그래서 도시 균형 말고도 모델과 이미지 크기를
+바꾼 것이 도움이 됐다고 생각한다. 반대로 서울은 0.026 떨어졌는데, Track A의
+\texttt{balanced}에서도 서울이 0.035 떨어졌으므로 도시 균형 때문에 서울 사진을 덜 보게 된
+영향으로 본다.
+
+아직 남은 가장 큰 실수는 같은 나라끼리 헷갈리는 것이다. 아래 검사 출력의 혼동 행렬에서
+오사카를 도쿄로 부른 사진이 651장, 도쿄를 오사카로 부른 사진이 718장으로 가장 많고,
+그다음이 서울을 도쿄로(343장), 타이베이를 서울로(321장) 부른 경우다. 그리고 Track B는
+실행마다 한 번씩만 돌렸기 때문에 Track A처럼 시드에 따른 흔들림이 얼마나 되는지는 아직
+확인하지 못했다. 이 모델을 \texttt{track-b-2}로 냈다. 모은 사진 45장을 더한 실행을 하나
+더 걸어 두었고, 그 결과는 \fillin{b\_mobilenet320\_mine의 검증 점수와 그것이 무엇을
+뜻하는지}.
+
+\subsection*{직접 모은 사진}
+
+사진 45장을 직접 모았다(서울 18장, 부산 27장). 내 폰과 친구 폰으로 찍은 사진이고,
+\texttt{src/gps\_sort.py}로 도시별 폴더에 넣었다. 이 스크립트는 사진에 남은 위치(GPS)를
+읽어 \texttt{src/cities.geojson}의 다섯 도시 경계와 비교하고, 맞는 도시의
+\texttt{data/mine/<도시>/}에 복사본을 만든다. 복사본은 바로 세우고 EXIF를 모두 지운 채
+저장되므로 위치·시각·기기 정보가 남지 않고, 원본은 건드리지 않는다. GPS가 없던 사진
+7장은 내가 어디서 찍었는지 알려주어 \texttt{--city}로 넣었고, 한 장은 서울 경계 밖(성남
+근처)이라 잘못된 라벨이 될까 봐 넣지 않았다. \texttt{src/count\_mine.py}로 세면 지금
+\texttt{data/mine}에는 45장이 있다(서울 18, 부산 27). 이 사진들은 아직 어느 학습에도 쓰이지
+않았고 다음 실행에서 처음 쓴다. 사진은 공개 저장소에 올리지 않고 \texttt{data/}에만 두었다
+(\texttt{.gitignore}에 있다). Colab에서 학습하려면 같은 폴더를 구글 드라이브의
+\texttt{My Drive/mas1004/assignment2/data/mine}에 올려 두어야 한다.
+
+\subsection*{검증 점수와 리더보드 점수}
+
+마지막 제출물(\texttt{track-b-2})의 검증 점수는 0.5593이다. Track B 리더보드 점수는
+\fillin{Track B 리더보드 점수}. 리더보드 사진은 학습 사진에 없는 유튜브 채널의 길거리 영상
+프레임이고 검증 사진은 66\%가 Wikimedia Commons 사진이라 두 묶음이 다르다. Track A에서는
+리더보드 점수가 검증 점수보다 0.09쯤 낮았으므로, Track B에서도 두 값이 다르게 나올 수
+있다고 본다.
 
 \subsection*{Your submission, as the grader sees it}
 \outputfile{outputs/check_submission.txt}
@@ -349,7 +439,13 @@ might disagree.}
 사진이 가장 많았던 서울과 타이베이가 내려간 반면 부산과 도쿄는 올라서, 같은 규칙이
 도시마다 반대로 작용했다. 그래서 전체 평균 하나로는 판단할 수 없는 변화였다.
 
-\textbf{Track B.} \fillin{Track B에서 가장 도움이 된 변화와 가장 안 된 변화, 그 숫자.}
+\textbf{Track B.} 지금까지 바꾼 것은 \texttt{b\_mobilenet320} 하나다. 모델
+(mobilenet\_v3\_large), 이미지 크기(224에서 320), 에포크(4에서 6), 도시 균형
+(\texttt{--balance})을 한꺼번에 바꿨고 검증 점수가 0.4862에서 0.5593으로 0.0731 올랐다.
+Track A에서 쓴 시드 차이 기준(0.015)보다 훨씬 크다. 다만 네 가지를 함께 바꿨기 때문에
+어느 것이 얼마나 도움이 됐는지는 나눌 수 없고, Track B는 시드를 바꿔 두 번 돌린 적이
+없어서 흔들림의 크기도 모른다. 가장 도움이 안 된 변화는 아직 말할 수 없다: 실행이 두 번뿐
+이고, 두 번째는 첫 번째보다 모든 면에서 무거운 쪽이라 비교할 짝이 없다.
 
 \textbf{다음 주가 있다면.} 먼저 \texttt{balanced}의 정도를 조절해보고 싶다. 지금은
 다섯 도시의 몫을 완전히 같게 했는데, 그러면 가장 잘 맞히던 도쿄의 점수를 0.104나
