@@ -369,6 +369,7 @@ tag & 이전 실행에서 바뀐 것 & 검증 점수 & 학습 장소 & 시간 \\
 \midrule
 b\_starter & 없음. \texttt{train\_b.py} 그대로 (resnet18 224, 4 에포크) & 0.4862 & 이 맥의 CPU & 1시간 56분 \\
 b\_mobilenet320 & mobilenet\_v3\_large, 320 px, 6 에포크, 도시를 똑같이 뽑음 & 0.5593 & Colab GPU & 57분 \\
+b\_mobilenet320\_repeat & 없음. b\_mobilenet320과 같은 설정, 같은 사진 & 0.5601 & Colab GPU & 58분 \\
 \bottomrule
 \end{tabular}
 
@@ -428,11 +429,10 @@ Track A의 도시 균형($+0.075$)보다 크다. 그래서 도시 균형 말고�
 오사카를 도쿄로 부른 사진이 651장, 도쿄를 오사카로 부른 사진이 718장으로 가장 많고,
 그다음이 서울을 도쿄로(343장), 타이베이를 서울로(321장) 부른 경우다. 그리고 Track B는
 실행마다 한 번씩만 돌렸기 때문에 Track A처럼 시드에 따른 흔들림이 얼마나 되는지는 그때는
-확인하지 못했지만, 같은 설정을 한 번 더 돌린 \texttt{b\_mobilenet320\_repeat}에서는 전체
-점수가 0.5593에서 0.5601로 0.0008밖에 움직이지 않았다. 이 모델을 \texttt{track-b-2}로
-냈다. 모은 사진 45장을 더한 실행을 하나
-더 걸어 두었고, 그 결과는 \fillin{b\_mobilenet320\_mine의 검증 점수와 그것이 무엇을
-뜻하는지}.
+확인하지 못했지만, 같은 설정을 한 번 더 돌린 \texttt{b\_mobilenet320\_repeat}(표 3)에서는
+전체 점수가 0.5593에서 0.5601로 0.0008밖에 움직이지 않았다. 이 모델을 \texttt{track-b-2}로
+냈다. 모은 사진 45장을 더한 실행을 하나 더 걸어 두었고, 그 결과는
+\fillin{b\_mobilenet320\_mine의 검증 점수와 그것이 무엇을 뜻하는지}.
 
 \begin{center}\footnotesize
 \begin{tabular}{lrrrrrr}
