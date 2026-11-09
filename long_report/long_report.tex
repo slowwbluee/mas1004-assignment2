@@ -14,8 +14,6 @@
 
 \documentclass[11pt]{article}
 \usepackage[ko]{mas1004}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.16}
 
 \reporttitle{Assignment 2: Long report}
 \studentname{김소연}
@@ -172,26 +170,7 @@ taipei & 0.5399 & 0.5170 & 0.5147 & 0.5834 \\
 
 \begin{figure}[h]
 \centering
-\begin{tikzpicture}
-\begin{axis}[
-  ybar, bar width=5pt, width=\linewidth, height=6.2cm,
-  ymin=0.30, ymax=0.68,
-  ylabel={검증 점수},
-  symbolic x coords={seoul,busan,tokyo,osaka,taipei},
-  xtick=data,
-  enlarge x limits=0.16,
-  ymajorgrids, grid style={gray!25},
-  tick label style={font=\footnotesize},
-  label style={font=\footnotesize},
-  legend style={at={(0.5,-0.22)}, anchor=north, legend columns=-1, font=\footnotesize, draw=none},
-]
-\addplot coordinates {(seoul,0.5569) (busan,0.3838) (tokyo,0.6295) (osaka,0.3666) (taipei,0.5399)};
-\addplot coordinates {(seoul,0.5592) (busan,0.3773) (tokyo,0.6076) (osaka,0.3562) (taipei,0.5170)};
-\addplot coordinates {(seoul,0.5418) (busan,0.4011) (tokyo,0.6456) (osaka,0.3365) (taipei,0.5147)};
-\addplot coordinates {(seoul,0.5217) (busan,0.4587) (tokyo,0.5258) (osaka,0.4506) (taipei,0.5834)};
-\legend{baseline,street,drop\_street,balanced}
-\end{axis}
-\end{tikzpicture}
+\picturefile{figures/per_city_scores.png}
 \caption{레시피 넷의 도시별 검증 점수. 표 2와 같은 값(두 시드 평균)이고, 막대 하나가 레시피
 하나다. 다섯 도시를 따로 보면 어느 변화가 어느 도시를 움직였는지가 드러난다:
 \texttt{balanced}는 부산·오사카·타이베이에서 가장 높고 서울·도쿄에서 가장 낮다.}
@@ -215,7 +194,7 @@ taipei & 0.5399 & 0.5170 & 0.5147 & 0.5834 \\
 
 \begin{figure}[h]
 \centering
-\picturefile[0.92\linewidth]{figures/mistakes_baseline_seed0_busan_00.png}
+\picturefile[0.92\linewidth]{figures/mistakes_baseline_seed0_busan_00.jpg}
 \caption{baseline(시드 0)이 부산 사진이라고 확신했지만 틀린 48장. 검증 사진을 두 장에
 한 장씩 채점해 도시마다 가장 확신한 오답을 모은 것이다.}
 \end{figure}
@@ -257,8 +236,8 @@ drop\_street)이 나왔다.
 
 \begin{figure}[h]
 \centering
-\sidebyside{figures/grp_busan_commons_05_00.png}{뺀 묶음: 화재 현장 한 사건 150장, 규칙 8번}%
-{figures/grp_osaka_commons_10_00.png}{남긴 묶음: 오사카 지하철 승강장 149장, 규칙에 걸리지 않음}
+\sidebyside{figures/grp_busan_commons_05_00.jpg}{뺀 묶음: 화재 현장 한 사건 150장, 규칙 8번}%
+{figures/grp_osaka_commons_10_00.jpg}{남긴 묶음: 오사카 지하철 승강장 149장, 규칙에 걸리지 않음}
 \caption{묶음 하나가 시트 한 장, 규칙을 양쪽에서 본 예. 왼쪽은 부산의 업로더 한 사람이
 올린 화재 현장 사진이라 규칙 8번(한 사건을 수십 장)으로 통째로 뺐고, 오른쪽은 오사카의
 업로더 한 사람이 올린 지하철 승강장 사진이라 그대로 남겼다. 오른쪽 묶음은 제목 대부분에
