@@ -10,3 +10,5 @@ submission/*/
 .DS_Store
 # the short report is built and handed in on its own, not from this repository
 short_report.zip
+# the long report as it comes back from Overleaf
+long_report.zip
